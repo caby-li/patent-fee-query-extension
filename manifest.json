@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "专利费用查询助手",
+  "version": "1.1.0",
+  "description": "从本地 Excel 读取专利号，自动填入查询页面并保存 PDF，简化批量专利缴费信息查询流程。",
+  "permissions": [
+    "activeTab",
+    "sidePanel",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://cpquery.cponline.cnipa.gov.cn/*",
+        "*://*.cnipa.gov.cn/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "专利费用查询助手"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["libs/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>专利费用查询助手</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13px;
+      color: #333;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      color: white;
+      padding: 16px;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header h1 button:hover {
+      opacity: 1 !important;
+    }
+
+    .header .version {
+      font-size: 11px;
+      opacity: 0.8;
+      margin-top: 2px;
+    }
+
+    .content {
+      padding: 12px;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #feeCard {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #feeContent {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button[data-tip], button[data-tip-left] {
+      position: relative;
+    }
+
+    .card-title button:hover {
+      opacity: 1 !important;
+    }
+
+    button[data-tip]::after, button[data-tip-left]::after {
+      background: #333;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    button[data-tip]::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10;
+    }
+
+    button[data-tip]:hover::after {
+      opacity: 1;
+    }
+
+    button[data-tip-left]::after {
+      content: attr(data-tip-left);
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-right: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      z-index: 10;
+    }
+
+    button[data-tip-left]:hover::after {
+      opacity: 1;
+    }
+
+    .btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: #1a73e8;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: #1557b0;
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #555;
+      border: 1px solid #ddd;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #e8e8e8;
+    }
+
+    .btn-success {
+      background: #34a853;
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #2d8e47;
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-row .btn {
+      flex: 1;
+    }
+
+    /* 文件选择区域 */
+    .file-drop {
+      border: 2px dashed #d9d9d9;
+      border-radius: 8px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: #999;
+    }
+
+    .file-drop:hover, .file-drop.dragover {
+      border-color: #1a73e8;
+      color: #1a73e8;
+      background: #f0f7ff;
+    }
+
+    .file-drop .icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .file-drop p {
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .file-drop input[type="file"] {
+      display: none;
+    }
+
+    /* 列选择 */
+    .column-select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 13px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .column-select:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26,115,232,0.15);
+    }
+
+    /* 进度 */
+    .progress-bar {
+      height: 6px;
+      background: #f0f0f0;
+      border-radius: 3px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #1a73e8;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    /* 当前专利号 */
+    .current-patent {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a73e8;
+      text-align: center;
+      padding: 2px 0 4px;
+      word-break: break-all;
+    }
+
+    /* 专利列表 */
+    .patent-list {
+      max-height: 133px;
+      overflow-y: auto;
+      border: 1px solid #f0f0f0;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .patent-item {
+      padding: 6px 10px;
+      font-size: 12px;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .patent-item:hover {
+      background: #f0f7ff;
+    }
+
+    .patent-item:last-child {
+      border-bottom: none;
+    }
+
+    .patent-item .seq {
+      color: #999;
+      font-size: 11px;
+      min-width: 24px;
+    }
+
+    .patent-item.active {
+      background: #e8f0fe;
+      font-weight: 500;
+    }
+
+    .patent-item.done {
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    /* 截图保存路径 */
+    .path-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d9d9d9;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .path-input:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+
+    .path-hint {
+      font-size: 11px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    /* 空状态 */
+    .empty-state {
+      text-align: center;
+      padding: 30px 16px;
+      color: #999;
+    }
+
+    .empty-state .icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #34a853;
+      color: white;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+      animation: toastIn 0.3s ease;
+      transition: top 0.3s ease;
+    }
+
+    .toast.error { background: #ff4d4f; }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📋 专利费用查询助手 <button id="btnSettings" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 18px; padding: 0 4px; opacity: 0.8; transition: opacity 0.2s;" data-tip-left="设置">⚙️</button></h1>
+    <div class="version">v1.1.0</div>
+  </div>
+
+  <div class="content">
+    <!-- 加载 Excel -->
+    <div class="card hidden" id="loadCard">
+      <div class="card-title">📂 加载专利列表</div>
+      <div class="file-drop" id="fileDrop">
+        <div class="icon">📊</div>
+        <p>点击选择 Excel 文件<br>或拖拽文件到此处</p>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+      </div>
+    </div>
+
+    <!-- 选择列 -->
+    <div class="card hidden" id="columnCard">
+      <div class="card-title">📌 选择专利号列</div>
+      <select class="column-select" id="columnSelect">
+        <option value="">请选择包含专利号的列</option>
+      </select>
+      <div style="margin-top: 10px;">
+        <button class="btn btn-primary" id="btnConfirmColumn">确认选择</button>
+      </div>
+    </div>
+
+    <!-- 主操作区 -->
+    <div class="card" id="mainCard" style="margin-bottom: 8px;">
+      <div class="card-title" style="margin-bottom: 0px;">🔍 当前专利号 <button id="btnReset" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 20px; padding: 0 4px; opacity: 0.6; transition: opacity 0.2s;" data-tip="重置">🔄</button></div>
+      <div class="current-patent" id="currentPatent">-</div>
+
+      <div class="progress-text">
+        <span id="progressLabel">0 / 0</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+      </div>
+
+      <!-- 第1行：填入 + 下一个 -->
+      <div style="margin-top: 12px;">
+        <div class="btn-row">
+          <button class="btn btn-primary" id="btnFill">📝 填入专利号</button>
+          <button class="btn btn-success" id="btnNext">⏭️ 下一个专利</button>
+        </div>
+      </div>
+
+      <!-- 第2行：提取费用信息 -->
+      <div style="margin-top: 8px;">
+        <button class="btn btn-secondary" id="btnExtractFees" style="background: #e8f0fe; color: #1a73e8; border-color: #a8c7fa;">💰 提取费用信息</button>
+      </div>
+
+      <!-- 第3行：打印 + 提取并累积 -->
+      <div style="margin-top: 8px;">
+        <div class="btn-row">
+          <button class="btn btn-success" id="btnPrint">🖨️ 打印页面</button>
+          <button class="btn btn-primary" id="btnExtractAccumulate">📦 提取并累积</button>
+        </div>
+      </div>
+
+      <!-- 累积计数 -->
+      <div style="font-size: 11px; color: #999; margin-top: 6px; text-align: center;" id="accumulatedCount"></div>
+    </div>
+
+    <!-- 专利列表 -->
+    <div class="card" id="listCard" style="margin-bottom: 8px;">
+      <div class="card-title">📋 专利列表</div>
+      <div class="patent-list" id="patentList"></div>
+    </div>
+
+    <!-- 费用信息展示 -->
+    <div class="card" id="feeCard" style="margin-bottom: 0px;">
+      <div class="card-title">💰 费用信息
+        <button id="btnExportJson" style="margin-left: auto; padding: 2px 8px; font-size: 11px; border: 1px solid #d9d9d9; border-radius: 4px; background: #fff; cursor: pointer;">导出 JSON</button>
+      </div>
+      <div id="feeContent" style="font-size: 12px; line-height: 1.8;"></div>
+    </div>
+  </div>
+
+  <!-- 设置页面 -->
+  <div class="content hidden" id="settingsPage">
+    <div class="card">
+      <div class="card-title">⚙️ 设置 <button id="btnBackMain" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 16px; padding: 0 4px; transition: opacity 0.2s;" data-tip="返回">⬅️</button></div>
+
+      <div style="margin-bottom: 16px;">
+        <div style="font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600;">检索方式</div>
+        <div style="display: flex; border: 1px solid #d9d9d9; border-radius: 6px; overflow: hidden;">
+          <button id="modeAppNo" class="search-mode-btn active" style="flex: 1; padding: 6px 0; border: none; background: #1a73e8; color: white; font-size: 12px; cursor: pointer;">申请号</button>
+          <button id="modePubNo" class="search-mode-btn" style="flex: 1; padding: 6px 0; border: none; background: #fff; color: #555; font-size: 12px; cursor: pointer;">公告号</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 12px; color: #666; margin-bottom: 8px; font-weight: 600;">数据导出</div>
+        <button class="btn btn-secondary" id="btnExportAccumulated">📋 导出累积JSON</button>
+        <div style="margin-top: 8px;">
+          <div class="btn-row">
+            <button class="btn btn-secondary" id="btnExportExcelDue">📊 导出应缴年费表</button>
+            <button class="btn btn-secondary" id="btnExportExcelPaid">📊 导出成本核算表</button>
+          </div>
+        </div>
+        <div style="font-size: 11px; color: #999; margin-top: 6px; text-align: center;" id="settingsAccumulatedCount"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="libs/xlsx.full.min.js"></script>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
