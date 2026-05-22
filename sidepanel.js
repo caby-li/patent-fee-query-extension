@@ -542,7 +542,7 @@ async function handleExportExcelDue() {
       return;
     }
 
-    const rows = [['序号', '专利申请号', '应缴费用项目', '应缴费用数额', '缴费期限']];
+    const rows = [['序号', '专利申请号', '应缴费用项目', '应缴费用数额', '缴费期限', '费用状态']];
     let idx = 1;
     for (const [patentNo, info] of Object.entries(resp.data)) {
       const due = info.feesDue?.[0];
@@ -552,7 +552,8 @@ async function handleExportExcelDue() {
         patentNo,
         due.feeType || '',
         due.amount || '',
-        due.deadline || ''
+        due.deadline || '',
+        due.status || ''
       ]);
       idx++;
     }
