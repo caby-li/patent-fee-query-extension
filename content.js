@@ -161,8 +161,9 @@
           const feeType = cells[0].textContent.trim();
           const amount = cells[1].textContent.trim();
           const deadline = cells.length >= 3 ? cells[2].textContent.trim() : '';
+          const status = cells.length >= 4 ? cells[3].textContent.trim() : '';
           if (feeType && amount) {
-            result.feesDue.push({ feeType, amount, deadline });
+            result.feesDue.push({ feeType, amount, deadline, status });
           }
         }
       }
@@ -177,9 +178,10 @@
           result.feesPaid.push({
             feeType: cells[0].textContent.trim(),
             amount: cells[1].textContent.trim(),
-            payer: cells.length >= 3 ? cells[2].textContent.trim() : '',
-            payDate: cells.length >= 4 ? cells[3].textContent.trim() : '',
-            receiptNo: cells.length >= 5 ? cells[4].textContent.trim() : ''
+            payDate: cells.length >= 3 ? cells[2].textContent.trim() : '',
+            payer: cells.length >= 4 ? cells[3].textContent.trim() : '',
+            invoiceCode: cells.length >= 5 ? cells[4].textContent.trim() : '',
+            invoiceNo: cells.length >= 6 ? cells[5].textContent.trim() : ''
           });
         }
       }

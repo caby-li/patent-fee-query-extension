@@ -393,7 +393,7 @@
 <body>
   <div class="header">
     <h1>📋 专利费用查询助手 <button id="btnSettings" style="margin-left: auto; background: none; border: none; cursor: pointer; font-size: 18px; padding: 0 4px; opacity: 0.8; transition: opacity 0.2s;" data-tip-left="设置">⚙️</button></h1>
-    <div class="version">v1.1.0</div>
+    <div class="version">v1.2.0</div>
   </div>
 
   <div class="content">
@@ -489,8 +489,12 @@
         <button class="btn btn-secondary" id="btnExportAccumulated">📋 导出累积JSON</button>
         <div style="margin-top: 8px;">
           <div class="btn-row">
-            <button class="btn btn-secondary" id="btnExportExcelDue">📊 导出应缴年费表</button>
+            <button class="btn btn-secondary" id="btnExportExcelDue">📊 导出最近应缴费用表</button>
             <button class="btn btn-secondary" id="btnExportExcelPaid">📊 导出成本核算表</button>
+          </div>
+          <div class="btn-row" style="margin-top: 8px;">
+            <button class="btn btn-secondary" id="btnExportExcelPayment">💳 导出应缴年费表（网上缴费标准格式）</button>
+            <button class="btn btn-secondary" id="btnExportExcelDueAll">📊 导出全部应缴表</button>
           </div>
         </div>
         <div style="font-size: 11px; color: #999; margin-top: 6px; text-align: center;" id="settingsAccumulatedCount"></div>

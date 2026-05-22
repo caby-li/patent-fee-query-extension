@@ -25,6 +25,8 @@ const els = {
   btnExportAccumulated: document.getElementById('btnExportAccumulated'),
   btnExportExcelDue: document.getElementById('btnExportExcelDue'),
   btnExportExcelPaid: document.getElementById('btnExportExcelPaid'),
+  btnExportExcelPayment: document.getElementById('btnExportExcelPayment'),
+  btnExportExcelDueAll: document.getElementById('btnExportExcelDueAll'),
   accumulatedCount: document.getElementById('accumulatedCount'),
   feeCard: document.getElementById('feeCard'),
   feeContent: document.getElementById('feeContent'),
@@ -106,6 +108,8 @@ function bindEvents() {
   els.btnExportAccumulated.addEventListener('click', handleExportAccumulated);
   els.btnExportExcelDue.addEventListener('click', handleExportExcelDue);
   els.btnExportExcelPaid.addEventListener('click', handleExportExcelPaid);
+  els.btnExportExcelPayment.addEventListener('click', handleExportExcelPayment);
+  els.btnExportExcelDueAll.addEventListener('click', handleExportExcelDueAll);
 
   // 监听状态变化
   chrome.storage.onChanged.addListener((changes) => {
@@ -425,9 +429,9 @@ function renderFeeInfo(data) {
   if (data.feesDue && data.feesDue.length > 0) {
     html += '<div style="margin: 10px 0 6px;"><b>应缴费用</b> (共 ' + data.feesDue.length + ' 项)</div>';
     html += '<table style="width: 100%; border-collapse: collapse; font-size: 11px;">';
-    html += '<tr style="background: #f5f5f5;"><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">费用种类</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">金额</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">缴费截止日</th></tr>';
+    html += '<tr style="background: #f5f5f5;"><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">费用种类</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">金额</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">缴费截止日</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">费用状态</th></tr>';
     for (const fee of data.feesDue) {
-      html += `<tr><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.feeType)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">${escapeHtml(fee.amount)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">${escapeHtml(fee.deadline)}</td></tr>`;
+      html += `<tr><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.feeType)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">${escapeHtml(fee.amount)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">${escapeHtml(fee.deadline)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">${escapeHtml(fee.status)}</td></tr>`;
     }
     html += '</table>';
   }
@@ -436,9 +440,9 @@ function renderFeeInfo(data) {
   if (data.feesPaid && data.feesPaid.length > 0) {
     html += '<div style="margin: 10px 0 6px;"><b>已缴费用</b> (共 ' + data.feesPaid.length + ' 项)</div>';
     html += '<table style="width: 100%; border-collapse: collapse; font-size: 11px;">';
-    html += '<tr style="background: #f5f5f5;"><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">费用种类</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">金额</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">缴费日</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">收据号</th></tr>';
+    html += '<tr style="background: #f5f5f5;"><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">费用类别</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">应缴金额</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">缴费日期</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">缴费人姓名</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">票据代码</th><th style="padding: 4px; border: 1px solid #e8e8e8; text-align: left;">票据号码</th></tr>';
     for (const fee of data.feesPaid) {
-      html += `<tr><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.feeType)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">${escapeHtml(fee.amount)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">${escapeHtml(fee.payDate)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">${escapeHtml(fee.receiptNo)}</td></tr>`;
+      html += `<tr><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.feeType)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: right;">${escapeHtml(fee.amount)}</td><td style="padding: 4px; border: 1px solid #e8e8e8; text-align: center;">${escapeHtml(fee.payDate)}</td><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.payer)}</td><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.invoiceCode)}</td><td style="padding: 4px; border: 1px solid #e8e8e8;">${escapeHtml(fee.invoiceNo)}</td></tr>`;
     }
     html += '</table>';
   }
@@ -562,7 +566,7 @@ async function handleExportExcelDue() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, '应缴年费');
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    XLSX.writeFile(wb, `专利应缴年费_${dateStr}.xlsx`);
+    XLSX.writeFile(wb, `专利最近应缴费用_${dateStr}.xlsx`);
     showToast(`已导出 ${rows.length - 1} 条应缴年费记录`);
   } catch (e) {
     showToast('导出失败: ' + e.message, 'error');
@@ -628,6 +632,145 @@ async function handleExportExcelPaid() {
   } catch (e) {
     showToast('导出失败: ' + e.message, 'error');
   }
+}
+
+// ========== 导出网上缴费 Excel ==========
+async function handleExportExcelPayment() {
+  try {
+    const resp = await chrome.runtime.sendMessage({ action: 'GET_ACCUMULATED' });
+    if (!resp?.success || Object.keys(resp.data).length === 0) {
+      showToast('暂无累积数据，请先提取并累积', 'error');
+      return;
+    }
+
+    const rows = [['序号', '申请号/专利号/国际申请号/海牙转交编号', '业务类型', '票据抬头', '统一社会信用代码', '费用种类', '外币金额', '费用金额（人民币）', '备注']];
+    let idx = 1;
+
+    for (const [patentNo, info] of Object.entries(resp.data)) {
+      const feesDue = info.feesDue || [];
+      const normalizedNo = normalizePatentNumber(info.basicInfo?.patentNumber || patentNo);
+      const annualFee = feesDue.find(f => (f.feeType || '').includes('年费'));
+
+      if (annualFee) {
+        const patentType = inferPatentType(annualFee.feeType);
+        rows.push([
+          idx,
+          normalizedNo,
+          patentType,
+          '', // 票据抬头
+          '', // 统一社会信用代码
+          annualFee.feeType || '',
+          '', // 外币金额
+          annualFee.amount || '',
+          ''  // 备注
+        ]);
+      } else {
+        rows.push([
+          idx,
+          normalizedNo,
+          '', // 业务类型
+          '', // 票据抬头
+          '', // 统一社会信用代码
+          '', // 费用种类
+          '', // 外币金额
+          '', // 费用金额
+          '无应缴年费'
+        ]);
+      }
+      idx++;
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '网上缴费');
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    XLSX.writeFile(wb, `专利应缴年费_网上缴费标准格式_${dateStr}.xlsx`);
+    showToast(`已导出 ${rows.length - 1} 条网上缴费记录`);
+  } catch (e) {
+    showToast('导出失败: ' + e.message, 'error');
+  }
+}
+
+// ========== 导出全部应缴费用 Excel ==========
+async function handleExportExcelDueAll() {
+  try {
+    const resp = await chrome.runtime.sendMessage({ action: 'GET_ACCUMULATED' });
+    if (!resp?.success || Object.keys(resp.data).length === 0) {
+      showToast('暂无累积数据，请先提取并累积', 'error');
+      return;
+    }
+
+    const rows = [['序号', '专利申请号', '应缴费用项目', '应缴费用数额', '缴费期限']];
+    const merges = [];
+    let idx = 1;
+
+    for (const [patentNo, info] of Object.entries(resp.data)) {
+      const feesDue = info.feesDue || [];
+
+      if (feesDue.length === 0) {
+        rows.push([idx, patentNo, '无', '', '']);
+        idx++;
+        continue;
+      }
+
+      const startRow = rows.length;
+      feesDue.forEach((fee) => {
+        rows.push([
+          idx,
+          patentNo,
+          fee.feeType || '',
+          fee.amount || '',
+          fee.deadline || ''
+        ]);
+      });
+
+      if (feesDue.length > 1) {
+        merges.push({
+          s: { r: startRow, c: 0 },
+          e: { r: startRow + feesDue.length - 1, c: 0 }
+        });
+        merges.push({
+          s: { r: startRow, c: 1 },
+          e: { r: startRow + feesDue.length - 1, c: 1 }
+        });
+      }
+      idx++;
+    }
+
+    if (rows.length === 1) {
+      showToast('没有数据可导出', 'error');
+      return;
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    if (merges.length > 0) {
+      ws['!merges'] = merges;
+    }
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, '全部应缴费用');
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    XLSX.writeFile(wb, `专利全部应缴费用_${dateStr}.xlsx`);
+    showToast(`已导出 ${Object.keys(resp.data).length} 个专利的应缴费用记录`);
+  } catch (e) {
+    showToast('导出失败: ' + e.message, 'error');
+  }
+}
+
+function inferPatentType(feeType) {
+  if (!feeType) return '';
+  if (feeType.includes('实用新型')) return '实用新型';
+  if (feeType.includes('外观设计')) return '外观设计';
+  if (feeType.includes('发明')) return '发明';
+  return '';
+}
+
+function normalizePatentNumber(pn) {
+  if (!pn) return '';
+  let normalized = pn.replace(/^CN/i, '');
+  normalized = normalized.replace(/\./g, '');
+  normalized = normalized.replace(/\D/g, '');
+  return normalized;
 }
 
 // ========== 工具函数 ==========
